@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>مدیریت قیمت‌ها</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #f2fcfe, #e0f7fa);
+      color: #333;
+    }
+
+    header {
+      background-color: #00838f;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    main {
+      max-width: 960px;
+      margin: 30px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 28px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    th {
+      background-color: #e0f2f1;
+    }
+
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    .btn {
+      background-color: #00897b;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 10px 5px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .btn:hover {
+      background-color: #00695c;
+    }
+
+    #search-section {
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    #price-result {
+      font-size: 20px;
+      color: #2e7d32;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      color: #666;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>مدیریت و جستجوی قیمت</h1>
+  </header>
+
+  <main>
+    <section>
+      <h2>ورود کد و قیمت‌ها</h2>
+      <table id="price-table">
+        <thead>
+          <tr>
+            <th>کد کالا</th>
+            <th>قیمت خورده (تومان)</th>
+            <th>قیمت کیسه‌ای (تومان)</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr>
+            <td><input type="text" placeholder="مثلاً PP001" /></td>
+            <td><input type="number" placeholder="مثلاً 45000" /></td>
+            <td><input type="number" placeholder="مثلاً 850000" /></td>
+          </tr>
+        </tbody>
+      </table>
+      <button class="btn" onclick="addRow()">اضافه کردن ردیف</button>
+      <button class="btn" onclick="saveData()">ذخیره اطلاعات</button>
+    </section>
+
+    <section id="search-section">
+      <h2>جستجوی قیمت بر اساس کد</h2>
+      <input type="text" id="search-code" placeholder="کد را وارد کنید" style="width: 200px; padding: 8px; border-radius: 5px; border: 1px solid #ccc;" />
+      <button class="btn" onclick="findPrice()">جستجو</button>
+      <div id="price-result"></div>
+    </section>
+  </main>
+
+  <footer>
+    طراحی‌شده توسط ChatGPT | ذخیره‌سازی اطلاعات فقط در مرورگر شما انجام می‌شود
+  </footer>
+
+  <script>
+    function addRow() {
+      const tableBody = document.getElementById("table-body");
+      const newRow = document.createElement("tr");
+      newRow.innerHTML = `
+        <td><input type="text" placeholder="مثلاً PP002" /></td>
+        <td><input type="number" placeholder="مثلاً 40000" /></td>
+        <td><input type="number" placeholder="مثلاً 800000" /></td>
+      `;
+      tableBody.appendChild(newRow);
+    }
+
+    function saveData() {
+      const rows = document.querySelectorAll("#table-body tr");
+      const data = {};
+      rows.forEach(row => {
+        const code = row.children[0].querySelector("input").value.trim().toUpperCase();
+        const single = row.children[1].querySelector("input").value.trim();
+        const bulk = row.children[2].querySelector("input").value.trim();
+        if (code && (single || bulk)) {
+          data[code] = { single: single || "-", bulk: bulk || "-" };
+        }
+      });
+      localStorage.setItem("priceData", JSON.stringify(data));
+      alert("اطلاعات ذخیره شد");
+    }
+
+    function findPrice() {
+      const code = document.getElementById("search-code").value.trim().toUpperCase();
+      const data = JSON.parse(localStorage.getItem("priceData") || "{}");
+      const entry = data[code];
+      const result = document.getElementById("price-result");
+      if (entry !== undefined) {
+        result.innerHTML = `قیمت خورده: <strong>${entry.single}</strong> تومان<br>قیمت کیسه‌ای: <strong>${entry.bulk}</strong> تومان`;
+      } else {
+        result.innerText = "کدی یافت نشد.";
+      }
+    }
+  </script>
+</body>
+</html>
