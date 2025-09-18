@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مدیریت کیسه رنگ‌ها – حالت فایل (بدون ذخیره مرورگر)</title>
+<style>
+  body{font-family:Tahoma, sans-serif;background:#f6f8fb;margin:0;color:#111}
+  .container{max-width:1100px;margin:24px auto;padding:0 16px}
+  .section{background:#fff;border:1px solid #e5e7eb;border-radius:10px;margin:14px 0;padding:16px}
+  h1{margin:0 0 10px 0;color:#0f172a}
+  h3{margin:0 0 12px 0;color:#111827}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  input,select,button{padding:10px;border-radius:8px;border:1px solid #d1d5db;font-size:14px}
+  button{background:#0f766e;color:#fff;border:none;font-weight:600;cursor:pointer}
+  button:disabled{opacity:.6;cursor:default}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  table{width:100%;border-collapse:collapse;margin-top:10px}
+  th,td{border:1px solid #e5e7eb;padding:8px;text-align:center}
+  th{background:#f3f4f6}
+  .muted{color:#6b7280;font-size:.92em}
+  .chip{display:inline-block;background:#111827;color:#fff;border-radius:6px;padding:2px 8px;margin-left:6px}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .w-2{flex:2 1 0} .w-1{flex:1 1 0}
+  .danger{background:#b91c1c}
+  .accent{background:#1d4ed8}
+  .pdf-btn{background:#334155}
+  .badge{background:#111827;color:#fff;padding:2px 8px;border-radius:6px;margin-right:8px;font-size:.8em}
+  .topbar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .warn{background:#7f1d1d;color:#fff;padding:8px 12px;border-radius:8px}
+  .ok{background:#065f46;color:#fff;padding:8px 12px;border-radius:8px}
+  @media (max-width:720px){ .grid{grid-template-columns:1fr} }
+  @media print{ .no-print{display:none} .section{page-break-inside:avoid} }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="topbar no-print">
+    <div class="row">
+      <h1 style="font-size:30px;font-weight:700;font-family:'Tahoma','Vazirmatn','IRANSans',sans-serif;color:#0f766e;text-shadow:2px 2px 4px rgba(0,0,0,0.2);">انبار رنگ فراز</h1>
+      
+    </div>
+    
+  </div>
+  <div id="note" class="ok no-print" style="display:none"></div>
+  <div id="warn" class="warn no-print" style="display:none"></div>
+
+  <!-- اخطار موجودی صفر -->
+  <div class="section" id="zero-alert">
+    <h3>⚠️ اخطار موجودی صفر</h3>
+<div class="toolbar no-print">
+  <button id="btn-zero-show" class="accent">نمایش</button>
+  <button id="btn-zero-pdf" class="pdf-btn">دانلود PDF</button>
+</div>
+    <div id="zero-list" class="muted" style="display:none">در حال بررسی موجودی‌ها...</div>
+  </div>
+
+  <!-- تعریف کالا -->
+  <div class="section" id="define">
+    <h3>تعریف کالا</h3>
+    <div class="grid">
+      <input id="f-group" placeholder="کد گروه رنگی">
+      <input id="f-code" placeholder="کد رنگ">
+      <input id="f-qty" type="number" placeholder="تعداد اولیه (کیسه)">
+      <input id="f-bag" type="number" placeholder="قیمت کیسه">
+      <input id="f-kilo" type="number" placeholder="قیمت کیلو">
+    </div>
+    <div class="toolbar">
+      <button id="btn-add">ذخیره کالا</button>
+    </div>
+  </div>
+
+  <!-- ورود/خروج -->
+  <div class="section" id="io">
+    <h3>ورود / خروج</h3>
+    <div class="grid">
+      <select id="io-group"><option value="">— گروه رنگی —</option></select>
+      <select id="io-code"><option value="">— کد رنگ —</option></select>
+      <input id="io-date" type="date" />
+      <input id="io-qty" type="number" placeholder="تعداد (کیسه)">
+    </div>
+    <div class="toolbar">
+      <button id="btn-in">ورود</button>
+      <button id="btn-out" class="danger">خروج</button>
+      <button id="btn-io-pdf" class="pdf-btn">دانلود PDF</button>
+    </div>
+    <div id="io-log" class="muted"></div>
+  </div>
+
+  <!-- اصلاح تراکنش‌ها -->
+  
+    <!-- 🔸 گزارش‌های روزانه و بازه‌ای -->
+    <h4 style="margin-top:14px"><span class="chip">گزارش روزانه</span></h4>
+    <div class="grid no-print">
+      <input id="rep-date" type="date" placeholder="تاریخ گزارش">
+    </div>
+    <div class="toolbar no-print">
+      <button id="rep-daily-show" class="accent">نمایش گزارش روزانه</button>
+      <button id="rep-daily-pdf" class="btn-accent">دانلود PDF</button>
+    </div>
+    <div id="rep-daily"></div>
+
+    <h4 style="margin-top:14px"><span class="chip">گزارش بازه‌ای (ورود / خروج / موجودی)</span></h4>
+    <div class="grid no-print">
+      <input id="rep-from" type="date" placeholder="از تاریخ">
+      <input id="rep-to" type="date" placeholder="تا تاریخ">
+    </div>
+    <div class="toolbar no-print">
+      <button id="rep-range-show" class="accent">نمایش گزارش بازه‌ای</button>
+      <button id="rep-range-pdf" class="btn-accent">دانلود PDF</button>
+    </div>
+    <div id="rep-range"></div>
+<div class="section" id="edit-tx">
+    <h3>🛠️ اصلاح تاریخ / تعداد</h3>
+    <div class="grid no-print">
+      <select id="edit-group"><option value="">— گروه رنگی —</option></select>
+      <select id="edit-code"><option value="">— کد رنگ —</option></select>
+      <input id="edit-from" type="date" placeholder="از تاریخ">
+      <input id="edit-to" type="date" placeholder="تا تاریخ">
+      <div class="row no-print"><button id="edit-set-today" type="button">تا امروز</button><button id="edit-clear-dates" type="button" style="margin-right:6px">پاک کردن تاریخ‌ها</button></div>
+    </div>
+    <div class="toolbar no-print">
+      <button id="btn-edit-search" class="accent">جستجو</button>
+    </div>
+    <div id="edit-results"></div>
+  </div>
+
+  <!-- گزارش موجودی -->
+  <div class="section" id="inventory">
+    <h3>گزارش موجودی</h3>
+    <div class="grid no-print">
+      <select id="inv-group"><option value="">— گروه رنگی —</option></select>
+      <input id="inv-from" type="date" placeholder="از تاریخ">
+      <input id="inv-to" type="date" placeholder="تا تاریخ">
+      <input id="inv-search" placeholder="جستجو در کد">
+    </div>
+    <div class="toolbar no-print">
+      <button id="btn-inv-show" class="accent">نمایش گزارش</button>
+      <button id="btn-inv-csv" class="accent">خروجی CSV</button>
+      <button id="btn-inv-pdf" class="pdf-btn">دانلود PDF</button>
+    </div>
+    <div id="inv-table"></div>
+  </div>
+
+  <!-- استعلام قیمت -->
+  <div class="section" id="price">
+    <h3>💲 استعلام قیمت</h3>
+    <div class="grid no-print">
+      <select id="price-group"><option value="">— گروه رنگی —</option></select>
+      <select id="price-code"><option value="">— کد رنگ —</option></select>
+      <input id="price-direct" placeholder="یا کد را مستقیم وارد کنید">
+    </div>
+    <div class="toolbar no-print">
+      <button id="btn-price">نمایش قیمت</button>
+      <button id="btn-price-pdf" class="pdf-btn">دانلود PDF</button>
+    </div>
+    <div id="price-result" class="muted"></div>
+  </div>
+
+  <!-- لیست قیمت -->
+  <div class="section" id="pricelist">
+    <h3>🧾 لیست قیمت کلی (تفکیک رنگ)</h3>
+    <div class="grid no-print">
+      <select id="pl-group"><option value="">— همه گروه‌ها —</option></select>
+      <div></div><div></div>
+    </div>
+    <div class="toolbar no-print">
+      <button id="btn-pl-show" class="accent">نمایش</button>
+      <button id="btn-pl-csv">خروجی CSV</button>
+      <button id="btn-pl-pdf" class="pdf-btn">دانلود PDF</button>
+    </div>
+    <div id="pl-result"></div>
+  </div>
+
+  <!-- پشتیبان‌گیری / بازیابی (پایین صفحه) -->
+  
+  <!-- اصلاح قیمت‌ها -->
+  <div class="section" id="edit-price">
+    <h3>🛠️ اصلاح قیمت</h3>
+    <div class="grid no-print">
+      <select id="priceedit-group"><option value="">— گروه رنگی —</option></select>
+      <select id="priceedit-code"><option value="">— کد رنگ —</option></select>
+      <div></div>
+      <input id="priceedit-bag" type="number" placeholder="قیمت کیسه (جدید)">
+      <input id="priceedit-kilo" type="number" placeholder="قیمت کیلو (جدید)">
+      <div class="muted">هر فیلدی را خالی بگذاری، همان قیمت بدون تغییر می‌ماند.</div>
+    </div>
+    <div class="toolbar no-print">
+      <button id="btn-priceedit-fill" class="accent">نمایش قیمت فعلی</button>
+      <button id="btn-priceedit-save">ذخیره تغییر</button>
+    </div>
+    <div id="priceedit-current" class="muted"></div>
+  </div>
+
+  
+  <!-- 📊 گزارش‌های تحلیلی -->
+  <div class="section" id="analytics">
+    <h3>📊 گزارش‌های تحلیلی</h3>
+    <div class="muted">گزارش‌ها فقط داده‌ها را می‌خوانند و چیزی را تغییر نمی‌دهند.</div>
+    <div class="grid no-print" style="margin-top:8px">
+      <input id="ana-from" type="date" placeholder="از تاریخ">
+      <input id="ana-to" type="date" placeholder="تا تاریخ">
+      <select id="ana-group"><option value="">— همه گروه‌ها —</option></select>
+      <select id="ana-code"><option value="">— همه کدها —</option></select>
+    </div>
+    <div class="toolbar no-print">
+      <button id="ana-refresh">به‌روزرسانی گزارش‌ها</button>
+      <button id="ana-pdf" class="btn-accent">دانلود PDF</button>
+    </div>
+
+    <!-- 1) مصرف ماهانه -->
+    <h4 style="margin-top:14px"><span class="chip">۱) مصرف ماهانه (خروج)</span></h4>
+    <div class="toolbar no-print">
+      <button id="ana-monthly-pdf" class="btn-accent">دانلود PDF همین جدول</button>
+    </div>
+    <div id="ana-monthly"></div>
+
+    <!-- 2) پرمصرف‌ترین رنگ‌ها -->
+    <h4 style="margin-top:14px"><span class="chip">۲) پرمصرف‌ترین رنگ‌ها</span></h4>
+    <div class="grid no-print">
+      <input id="ana-top-n" type="number" min="1" value="10" placeholder="Top N">
+    </div>
+    <div class="toolbar no-print">
+      <button id="ana-top-pdf" class="btn-accent">دانلود PDF همین جدول</button>
+    </div>
+    <div id="ana-top"></div>
+
+    <!-- 3) بدون مصرف در بازه -->
+    <h4 style="margin-top:14px"><span class="chip">۳) بدون مصرف در بازه</span></h4>
+    <div class="toolbar no-print">
+      <button id="ana-idle-pdf" class="btn-accent">دانلود PDF همین جدول</button>
+    </div>
+    <div id="ana-idle"></div>
+
+    <!-- 4) موجودی + ارزش ریالی -->
+    <h4 style="margin-top:14px"><span class="chip">۴) موجودی به‌روز + ارزش ریالی</span></h4>
+    <div class="toolbar no-print">
+      <button id="ana-value-pdf" class="btn-accent">دانلود PDF همین جدول</button>
+    </div>
+    <div id="ana-value"></div>
+    
+    <!-- 5) ورود و خروج در بازه -->
+    <h4 style="margin-top:14px"><span class="chip">۵) ورود و خروج در بازه</span></h4>
+    <div class="toolbar no-print">
+      <button id="ana-moves-pdf" class="btn-accent">دانلود PDF همین جدول</button>
+    </div>
+    <div id="ana-moves"></div>
+    
+  </div>
+
+  <div class="section" id="backup">
+    <h3>📦 پشتیبان‌گیری / بازیابی</h3>
+    <div class="toolbar no-print">
+      <button id="btn-backup-bottom">دانلود بک‌آپ (JSON)</button>
+      <input id="file-restore-bottom" type="file" accept="application/json">
+      <button id="btn-restore-bottom" class="accent">بازیابی از فایل</button>
+    </div>
+    <div class="muted">این فایل شامل همهٔ کالاها، قیمت‌ها و تاریخچهٔ تراکنش‌هاست.</div>
+  </div>
+</div>
+
+
+<script>
+
+  // === Shamsi (Jalali) display only ===
+  const DISPLAY_SHAMSI = true;
+  (function(){
+    if(!DISPLAY_SHAMSI) return;
+    try {
+      const shamsiFmt = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { year:'numeric', month:'2-digit', day:'2-digit' });
+      const _toLDS = Date.prototype.toLocaleDateString;
+      Date.prototype.toLocaleDateString = function(locale, options){
+        try { return shamsiFmt.format(this); } catch(e) { return _toLDS.call(this, locale, options); }
+      };
+      window.toShamsi = function(d){
+        try { return shamsiFmt.format(new Date(d)); } catch(e) { return d; }
+      };
+    } catch (e) {
+      console.warn('Shamsi Intl formatter not available:', e);
+      window.toShamsi = function(d){ return d; };
+    }
+    window.postProcessDates = function(root){
+      if(!DISPLAY_SHAMSI) return;
+      const scope = root || document;
+      const nodes = scope.querySelectorAll('.report table td, .report table th, table td, table th, span.date, .date-cell');
+      nodes.forEach(el=>{
+        const t = (el.textContent||'').trim();
+        if(/^\d{4}[-\/]\d{2}[-\/]\d{2}/.test(t)){
+          const iso = t.replace(/\//g,'-');
+          const d = new Date(iso);
+          if(!isNaN(d.getTime())){
+            el.textContent = toShamsi(d);
+          }
+        }
+      });
+    };
+  })();
+
+
+  const BAG_SIZE = 25; // هر کیسه 25 کیلو
+
+(function(){
+  // ===== In-memory DB (File Mode) =====
+  window.DB = { items: [], txns: [] };
+  // ===== LocalStorage persistence (AUTO-SAVE) =====
+  function saveToLocal(){
+    try{ localStorage.setItem("colorsDB", JSON.stringify(DB)); }catch(e){ /* ignore quota errors */ }
+  }
+  function loadFromLocal(){
+    try{
+      const raw = localStorage.getItem("colorsDB");
+      if(raw){
+        const obj = JSON.parse(raw);
+        if(obj && Array.isArray(obj.items) && Array.isArray(obj.txns)){
+          DB.items = obj.items; DB.txns = obj.txns;
+        }
+      }
+    }catch(e){ /* ignore parse errors */ }
+  }
+  // Load immediately (before first render)
+  loadFromLocal();
+
+  let dirty = false;
+
+  function el(id){ return document.getElementById(id); }
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
+  el("io-date").value = todayISO();
+
+  function note(msg){ const n=el("note"); if(!n) return; n.textContent=msg; n.style.display="block"; setTimeout(()=> n.style.display="none", 2500); }
+  function warn(msg){ const w=el("warn"); if(!w) return; w.textContent=msg; w.style.display="block"; }
+
+  // ===== File Save / Load =====
+  function downloadJSON(name, obj){
+    const blob = new Blob([JSON.stringify(obj,null,2)], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  }
+  if(el("btn-save")) el("btn-save").addEventListener("click", function(){
+    downloadJSON("colors_data.json", DB);
+    dirty = false; note("✅ فایل داده ذخیره شد.");
+  });
+  if(el("btn-load")) el("btn-load").addEventListener("click", function(){
+    const f = el("file-load").files[0];
+    if(!f){ warn("لطفاً یک فایل JSON انتخاب کنید."); return; }
+    const r = new FileReader();
+    r.onload = function(){
+      try{
+        const data = JSON.parse(r.result);
+        if(data && Array.isArray(data.items) && Array.isArray(data.txns)){
+          DB.items = data.items; DB.txns = data.txns; dirty=false;
+          refreshAll(); note("✅ داده‌ها بارگذاری شد.");
+        }else if(Array.isArray(data)){
+          DB.items = data; DB.txns = []; dirty=false; refreshAll(); note("✅ داده‌ها (فرمت قدیمی) بارگذاری شد.");
+        }else{ warn("فرمت فایل معتبر نیست."); }
+      }catch(e){ warn("خواندن فایل ناموفق بود."); }
+    };
+    r.readAsText(f);
+  });
+
+  // ===== Helpers =====
+  function groups(){ return Array.from(new Set(DB.items.map(x=>x.group).filter(Boolean))).sort(); }
+  function fillGroupSelect(sel, allLabel){
+    const cur = sel.value;
+    sel.innerHTML = "";
+    const o0 = document.createElement("option"); o0.value=""; o0.textContent=allLabel||"— گروه رنگی —"; sel.appendChild(o0);
+    groups().forEach(g=>{ const o=document.createElement("option"); o.value=g; o.textContent=g; sel.appendChild(o); });
+    if(cur && groups().includes(cur)) sel.value=cur;
+  }
+  function fillCodeByGroup(groupSel, codeSel){
+    const g = groupSel.value;
+    const its = DB.items;
+    const cur = codeSel.value;
+    codeSel.innerHTML = "";
+    const o0 = document.createElement("option"); o0.value=""; o0.textContent="— کد رنگ —"; codeSel.appendChild(o0);
+    its.filter(i=> !g || i.group===g).forEach(i=>{ const o=document.createElement("option"); o.value=i.code; o.textContent=i.code; codeSel.appendChild(o); });
+    codeSel.value = cur;
+  }
+  function table(headers, rows){
+    const t = document.createElement("table");
+    const thead = document.createElement("thead");
+    const trh = document.createElement("tr");
+    headers.forEach(h=>{ const th=document.createElement("th"); th.textContent=h; trh.appendChild(th); });
+    thead.appendChild(trh); t.appendChild(thead);
+    const tb = document.createElement("tbody");
+    rows.forEach(r=>{
+      const tr=document.createElement("tr");
+      r.forEach(c=>{ const td=document.createElement("td"); td.textContent=(c==null? "": c); tr.appendChild(td); });
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+    return t;
+  }
+  function exportPDF(sectionId, title){
+    const node = el(sectionId);
+    if(!node){ alert("بخش مورد نظر پیدا نشد."); return; }
+    const win = window.open("", "_blank");
+    const styles = `
+      <style>
+        @page { size: A4; margin: 16mm; }
+        body { font-family: Tahoma, sans-serif; color:#111; }
+        h1,h2,h3{ margin:0 0 8px 0; }
+        .header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+        .meta{ color:#6b7280; font-size:12px; }
+        table{ width:100%; border-collapse:collapse; }
+        th,td{ border:1px solid #e5e7eb; padding:6px; text-align:center; font-size:12px; }
+        th{ background:#f3f4f6; }
+        .group-title{ background:#111827; color:#fff; padding:4px 8px; border-radius:6px; display:inline-block; margin:10px 0 6px 0; }
+      </style>`;
+    const content = node.cloneNode(true);
+    content.querySelectorAll('.no-print, .toolbar').forEach(e=> e.remove());
+    const now = new Date().toLocaleString("fa-IR");
+    win.document.write(`<!DOCTYPE html><html dir="rtl" lang="fa"><head><meta charset="utf-8"><title>${title}</title>${styles}</head><body>`);
+    win.document.write(`<div class="header"><h2>${title}</h2><div class="meta">${now}</div></div>`);
+    win.document.body.appendChild(content);
+    win.document.write(`
+</body></html>`);
+    win.document.close(); setTimeout(()=> win.print(), 300);
+  }
+
+  // ===== Quantity computation =====
+  function computeQty(code){
+    const it = DB.items.find(i=> i.code===code);
+    if(!it) return 0;
+    const base = (typeof it.qty0 === 'number') ? it.qty0 : (typeof it.qty === 'number' ? it.qty : 0);
+    const delta = DB.txns.filter(t=> t.code===code).reduce((s,t)=> s + (t.type==='in'? +t.qty : -t.qty), 0);
+    return base + delta;
+  }
+  function computeQtyAtDate(code, dateTo){
+    const it = DB.items.find(i=> i.code===code);
+    if(!it) return 0;
+    const base = (typeof it.qty0 === 'number') ? it.qty0 : (typeof it.qty === 'number' ? it.qty : 0);
+    const cutoff = dateTo || "9999-12-31";
+    const delta = DB.txns.filter(t=> t.code===code && (t.date||"") <= cutoff)
+                         .reduce((s,t)=> s + (t.type==='in'? +t.qty : -t.qty), 0);
+    return base + delta;
+  }
+
+  // ===== Define Item =====
+  el("btn-add").addEventListener("click", function(){
+    const group = (el("f-group").value||"").trim();
+    const code  = (el("f-code").value||"").trim();
+    const qty   = parseInt(el("f-qty").value, 10);
+    const bag   = parseFloat(el("f-bag").value);
+    const kilo  = parseFloat(el("f-kilo").value);
+    if(!group || !code || isNaN(qty)){ warn("گروه، کد و تعداد اولیه الزامی است."); return; }
+    if(DB.items.some(i=> i.code===code)){ warn("این کد قبلاً ثبت شده است."); return; }
+    DB.items.push({group, code, qty: qty, qty0: qty, bagPrice: isNaN(bag)? null: bag, kiloPrice: isNaN(kilo)? null: kilo});
+    el("f-group").value = el("f-code").value = el("f-qty").value = el("f-bag").value = el("f-kilo").value = "";
+    dirty = true; 
+    try{ saveToLocal(); }catch(e){}note("✅ کالا اضافه شد (برای ماندگاری «ذخیره فایل داده» را بزنید)");
+    refreshAll();
+  });
+
+  // ===== I/O =====
+  el("io-group").addEventListener("change", ()=> fillCodeByGroup(el("io-group"), el("io-code")));
+  el("btn-in").addEventListener("click", function(){
+    const code = el("io-code").value; const q = parseInt(el("io-qty").value,10); const d = el("io-date").value || todayISO();
+    if(!code || isNaN(q) || q<=0){ warn("کد و تعداد را درست وارد کنید."); return; }
+    const it = DB.items.find(i=> i.code===code); if(!it){ warn("کالا یافت نشد."); return; }
+    DB.txns.push({id: Date.now()+"-"+Math.random().toString(16).slice(2), code, qty:q, type:"in", date: d});
+    el("io-qty").value=""; logIO("ورود", code, q, d); dirty=true; saveToLocal(); note("✅ تراکنش ذخیره شد (برای ماندگاری فایل را ذخیره کنید)"); refreshAll();
+  });
+  el("btn-out").addEventListener("click", function(){
+    const code = el("io-code").value; const q = parseInt(el("io-qty").value,10); const d = el("io-date").value || todayISO();
+    if(!code || isNaN(q) || q<=0){ warn("کد و تعداد را درست وارد کنید."); return; }
+    if(computeQty(code) < q){ warn("موجودی کافی نیست."); return; }
+    DB.txns.push({id: Date.now()+"-"+Math.random().toString(16).slice(2), code, qty:q, type:"out", date: d});
+    el("io-qty").value=""; logIO("خروج", code, q, d); dirty=true; saveToLocal(); note("✅ تراکنش ذخیره شد (برای ماندگاری فایل را ذخیره کنید)"); refreshAll();
+  });
+  function logIO(type, code, qty, d){
+    const area = el("io-log");
+    const time = (d? d+" " : "") + new Date().toLocaleTimeString("fa-IR");
+    const div = document.createElement("div");
+    div.textContent = type + " " + qty + " کیسه | کد " + code + " | " + time;
+    area.prepend(div);
+  }
+  el("btn-io-pdf").addEventListener("click", ()=> exportPDF("io","گزارش ورود/خروج"));
+
+  // ===== Edit Transactions =====
+  function fillEditSelectors(){
+    const gsel = el("edit-group"); const csel = el("edit-code");
+    const curG = gsel.value, curC = csel.value;
+    gsel.innerHTML = ""; const g0=document.createElement("option"); g0.value=""; g0.textContent="— گروه رنگی —"; gsel.appendChild(g0);
+    groups().forEach(g=>{ const o=document.createElement("option"); o.value=g; o.textContent=g; gsel.appendChild(o); });
+    gsel.value = curG;
+    csel.innerHTML = ""; const c0=document.createElement("option"); c0.value=""; c0.textContent="— کد رنگ —"; csel.appendChild(c0);
+    DB.items.filter(i=> !gsel.value || i.group===gsel.value).forEach(i=>{ const o=document.createElement("option"); o.value=i.code; o.textContent=i.code; csel.appendChild(o); });
+    csel.value = curC;
+  }
+  el("edit-group").addEventListener("change", fillEditSelectors);
+  el("edit-set-today").addEventListener("click", ()=> el("edit-to").value = todayISO());
+  el("edit-clear-dates").addEventListener("click", ()=> (el("edit-from").value="", el("edit-to").value=""));
+  el("btn-edit-search").addEventListener("click", function(){
+    const code = el("edit-code").value;
+    const d1 = el("edit-from").value || "0000-01-01";
+    const d2 = el("edit-to").value || "9999-12-31";
+    const holder = el("edit-results"); holder.innerHTML = "";
+    let tx = DB.txns.filter(t=> (!code || t.code===code) && (t.date>=d1 && t.date<=d2));
+    tx.sort((a,b)=> (a.date<b.date? -1: a.date>b.date? 1: 0));
+    if(tx.length===0){ const d=document.createElement("div"); d.className="muted"; d.textContent="چیزی یافت نشد."; holder.appendChild(d); return; }
+    const t = document.createElement("table");
+    const thead = document.createElement("thead"); const trh=document.createElement("tr");
+    ["تاریخ","نوع","کد","تعداد","عملیات"].forEach(h=>{ const th=document.createElement("th"); th.textContent=h; trh.appendChild(th); });
+    thead.appendChild(trh); t.appendChild(thead);
+    const tb = document.createElement("tbody");
+    tx.forEach(row=>{
+      const tr=document.createElement("tr"); tr.dataset.id=row.id;
+      const tdD=document.createElement("td"); const inputD=document.createElement("input"); inputD.type="date"; inputD.value=row.date; tdD.appendChild(inputD);
+      const tdT=document.createElement("td"); tdT.textContent = row.type==="in"?"ورود":"خروج";
+      const tdC=document.createElement("td"); tdC.textContent = row.code;
+      const tdQ=document.createElement("td"); const inputQ=document.createElement("input"); inputQ.type="number"; inputQ.value=row.qty; inputQ.style.width="90px"; tdQ.appendChild(inputQ);
+      const tdA=document.createElement("td");
+      const btnS=document.createElement("button"); btnS.textContent="ذخیره"; btnS.className="accent"; tdA.appendChild(btnS);
+      const btnDel=document.createElement("button"); btnDel.textContent="حذف"; btnDel.className="danger"; btnDel.style.marginRight="6px"; tdA.appendChild(btnDel);
+
+      tb.appendChild(tr);
+      tr.appendChild(tdD); tr.appendChild(tdT); tr.appendChild(tdC); tr.appendChild(tdQ); tr.appendChild(tdA);
+
+      btnS.addEventListener("click", function(){
+        const newDate = inputD.value || row.date;
+        const newQty = parseInt(inputQ.value,10);
+        if(isNaN(newQty) || newQty<=0){ warn("تعداد معتبر نیست."); return; }
+        // validate change (no negative)
+        const before = computeQty(row.code);
+        const delta = (row.type==="in"? 1:-1) * (newQty - row.qty);
+        if(delta<0 && before < Math.abs(delta)){ warn("این تغییر باعث منفی شدن موجودی می‌شود."); return; }
+        // apply
+        const idx = DB.txns.findIndex(t=> t.id===row.id);
+        if(idx>=0){ DB.txns[idx].date=newDate; DB.txns[idx].qty=newQty; dirty=true; saveToLocal(); note("✅ تغییرات تراکنش ذخیره شد (برای ماندگاری فایل را ذخیره کنید)"); }
+      });
+
+      btnDel.addEventListener("click", function(){
+        if(!confirm("این تراکنش حذف شود؟")) return;
+        const before = computeQty(row.code);
+        const delta = (row.type==="in"? -row.qty : row.qty);
+        if(delta<0 && before < Math.abs(delta)){ warn("حذف باعث منفی شدن موجودی می‌شود."); return; }
+        DB.txns = DB.txns.filter(t=> t.id!==row.id); dirty=true; saveToLocal(); tr.remove(); note("✅ حذف شد (برای ماندگاری فایل را ذخیره کنید)"); refreshAll();
+      });
+    });
+    t.appendChild(tb); holder.appendChild(t);
+  });
+
+  // ===== Inventory Report =====
+  function renderInventory(){
+    const g = el("inv-group").value;
+    const fromD = el("inv-from").value || "";
+    const toD   = el("inv-to").value   || "";
+    const itsRaw = DB.items.filter(i=> !g || i.group===g);
+    const cutoff = toD || todayISO();
+    const q = (el("inv-search").value||"").trim().toLowerCase();
+    const its = itsRaw.map(i=> ({
+      group: i.group, code: i.code,
+      qty: computeQtyAtDate(i.code, cutoff),
+      bagPrice: i.bagPrice, kiloPrice: i.kiloPrice
+    })).filter(i=> !q || (i.code||"").toLowerCase().includes(q));
+    const rows = its
+      .sort((a,b)=> (a.group||"").localeCompare(b.group||"", "fa") || (a.code||"").localeCompare(b.code||"", "fa"))
+      .map(i=> [i.group, i.code, i.qty, i.bagPrice==null?"-":i.bagPrice, i.kiloPrice==null?"-":i.kiloPrice]);
+    const root = el("inv-table"); root.innerHTML=""; root.appendChild(table(["گروه","کد","موجودی تا تاریخ","قیمت کیسه","قیمت کیلو"], rows));
+  }
+  if(el("btn-inv-show")) el("btn-inv-show").addEventListener("click", renderInventory);
+  el("btn-inv-csv").addEventListener("click", function(){
+    const g = el("inv-group").value; const cutoff = (el("inv-to").value || todayISO());
+    const q = (el("inv-search").value||"").trim().toLowerCase();
+    const its = DB.items.filter(i=> !g || i.group===g).filter(i=> !q || (i.code||"").toLowerCase().includes(q));
+    let csv = "group,code,qty_as_of,bag_price,kilo_price\n";
+    its.forEach(i=>{ const qty=computeQtyAtDate(i.code, cutoff); csv += [i.group,i.code,qty,(i.bagPrice??""),(i.kiloPrice??"")].join(",") + "\n"; });
+    downloadJSON("inventory.csv", csv);
+  });
+  el("btn-inv-pdf").addEventListener("click", ()=> exportPDF("inventory","گزارش موجودی"));
+
+  // ===== Price Inquiry =====
+  function fillPriceCodes(){ fillCodeByGroup(el("price-group"), el("price-code")); }
+  el("price-group").addEventListener("change", fillPriceCodes);
+  el("btn-price").addEventListener("click", function(){
+    const code = el("price-code").value || el("price-direct").value.trim();
+    if(!code){ warn("کد را وارد یا انتخاب کنید."); return; }
+    const it = DB.items.find(i=> i.code===code);
+    const out = el("price-result");
+    out.innerHTML = "";
+    if(!it){ out.textContent = "کدی با این مقدار یافت نشد."; return; }
+    const line1 = document.createElement("div");
+    line1.textContent = "گروه: " + (it.group||"-") + " | کد: " + it.code;
+    const line2 = document.createElement("div");
+    line2.textContent = "قیمت کیسه: " + (it.bagPrice==null?"-":it.bagPrice) + " | قیمت کیلو: " + (it.kiloPrice==null?"-":it.kiloPrice);
+    out.appendChild(line1); out.appendChild(line2);
+  });
+  el("btn-price-pdf").addEventListener("click", ()=> exportPDF("price","استعلام قیمت"));
+
+  // ===== Price List =====
+  el("btn-pl-show").addEventListener("click", function(){
+    const g = el("pl-group").value;
+    const its = DB.items.filter(i=> !g || i.group===g).sort((a,b)=> (a.group||"").localeCompare(b.group||"", "fa") || (a.code||"").localeCompare(b.code||"", "fa"));
+    const by = {}; its.forEach(i=>{ (by[i.group||"-"] = by[i.group||"-"] || []).push(i); });
+    const root = el("pl-result"); root.innerHTML="";
+    if(its.length===0){ const d=document.createElement("div"); d.className="muted"; d.textContent="موردی یافت نشد."; root.appendChild(d); return; }
+    const stat=document.createElement("div"); stat.className="muted"; stat.innerHTML="تعداد گروه: <b>"+Object.keys(by).length+"</b> | تعداد کد: <b>"+its.length+"</b>"; root.appendChild(stat);
+    Object.keys(by).sort().forEach(k=>{
+      const h = document.createElement("h4"); const chip=document.createElement("span"); chip.className="chip"; chip.textContent=k; h.appendChild(chip); root.appendChild(h);
+      const rows = by[k].map(i=> [i.code, i.bagPrice==null?"-":i.bagPrice, i.kiloPrice==null?"-":i.kiloPrice]);
+      root.appendChild(table(["کد","قیمت کیسه","قیمت کیلو"], rows));
+    });
+  });
+  el("btn-pl-csv").addEventListener("click", function(){
+    const g = el("pl-group").value;
+    const its = DB.items.filter(i=> !g || i.group===g).sort((a,b)=> (a.group||"").localeCompare(b.group||"", "fa") || (a.code||"").localeCompare(b.code||"", "fa"));
+    let csv = "group,code,bag_price,kilo_price\n";
+    its.forEach(i=>{ csv += [i.group,i.code,(i.bagPrice??""),(i.kiloPrice??"")].join(",") + "\n"; });
+    downloadJSON("price_list.csv", csv);
+  });
+  el("btn-pl-pdf").addEventListener("click", ()=> exportPDF("pricelist","لیست قیمت کلی (تفکیک رنگ)"));
+
+  // ===== Zero-inventory alert =====
+  function updateZeroAlert(){
+    const its = DB.items.map(i=> ({group:i.group, code:i.code, qty: computeQty(i.code)}))
+      .filter(i=> i.qty===0)
+      .sort((a,b)=> (a.group||"").localeCompare(b.group||"", "fa") || (a.code||"").localeCompare(b.code||"", "fa"));
+    const root = el("zero-list");
+    if(!root) return;
+    if(its.length===0){ root.textContent = "هیچ کالای با موجودی صفر یافت نشد."; return; }
+    const ul = document.createElement("ul");
+    its.forEach(i=>{ const li=document.createElement("li"); li.textContent = `🔴 گروه ${i.group} | کد ${i.code} | موجودی: 0`; ul.appendChild(li); });
+    root.innerHTML = ""; root.appendChild(ul);
+  }
+
+  
+  // ===== Bottom Backup/Restore =====
+  (function(){
+    var btnB = document.getElementById("btn-backup-bottom");
+    var inpR = document.getElementById("file-restore-bottom");
+    var btnR = document.getElementById("btn-restore-bottom");
+    if(btnB){
+      btnB.addEventListener("click", function(){
+        // same as top "ذخیره فایل داده"
+        const blob = new Blob([JSON.stringify(DB,null,2)], {type:"application/json"});
+        const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "colors_data.json"; a.click();
+        note("✅ بک‌آپ دانلود شد.");
+      });
+    }
+    if(btnR){
+      btnR.addEventListener("click", function(){
+        const f = (inpR && inpR.files && inpR.files[0]) ? inpR.files[0] : null;
+        if(!f){ warn("لطفاً فایل JSON را انتخاب کنید."); return; }
+        const r = new FileReader();
+        r.onload = function(){
+          try{
+            const data = JSON.parse(r.result);
+            if(data && Array.isArray(data.items) && Array.isArray(data.txns)){
+              DB.items = data.items; DB.txns = data.txns;
+              refreshAll(); note("✅ بازیابی انجام شد.");
+            }else if(Array.isArray(data)){
+              DB.items = data; DB.txns = [];
+              refreshAll(); note("✅ بازیابی انجام شد (فرمت قدیمی).");
+            }else{ warn("فرمت فایل معتبر نیست."); }
+          }catch(e){ warn("خواندن فایل ناموفق بود."); }
+        };
+        r.readAsText(f);
+      });
+    }
+  })();
+
+  
+  // ===== Edit Price (قیمت) =====
+  function fillPriceEditSelectors(){
+    var gsel = el("priceedit-group"); var csel = el("priceedit-code");
+    if(!gsel || !csel) return;
+    // groups
+    fillGroupSelect(gsel, "— گروه رنگی —");
+    // codes by group
+    const g = gsel.value || "";
+    const items = DB.items;
+    const curC = csel.value;
+    csel.innerHTML = "";
+    var o0=document.createElement("option"); o0.value=""; o0.textContent="— کد رنگ —"; csel.appendChild(o0);
+    items.filter(i=> !g || i.group===g).forEach(i=>{ var o=document.createElement("option"); o.value=i.code; o.textContent=i.code; csel.appendChild(o); });
+    if(curC && items.some(i=> i.code===curC)) csel.value = curC;
+  }
+  (function(){ 
+    var gsel = el("priceedit-group");
+    if(gsel) gsel.addEventListener("change", fillPriceEditSelectors);
+  })();
+
+  if(el("btn-priceedit-fill")) el("btn-priceedit-fill").addEventListener("click", function(){
+    const code = el("priceedit-code")?.value;
+    const out = el("priceedit-current");
+    if(!code){ out.textContent = "کد را انتخاب کنید."; return; }
+    const it = DB.items.find(i=> i.code===code);
+    if(!it){ out.textContent = "کالا یافت نشد."; return; }
+    out.innerHTML = "قیمت فعلی — کیسه: <b>"+(it.bagPrice==null? "-" : it.bagPrice)+"</b> | کیلو: <b>"+(it.kiloPrice==null? "-" : it.kiloPrice)+"</b>";
+    if(el("priceedit-bag")) el("priceedit-bag").value = (it.bagPrice==null? "" : it.bagPrice);
+    if(el("priceedit-kilo")) el("priceedit-kilo").value = (it.kiloPrice==null? "" : it.kiloPrice);
+  });
+
+  if(el("btn-priceedit-save")) el("btn-priceedit-save").addEventListener("click", function(){
+    const code = el("priceedit-code")?.value;
+    if(!code){ warn("کد را انتخاب کنید."); return; }
+    const it = DB.items.find(i=> i.code===code);
+    if(!it){ warn("کالا یافت نشد."); return; }
+    const bag = parseFloat(el("priceedit-bag").value);
+    const kilo = parseFloat(el("priceedit-kilo").value);
+    let changed = false;
+    if(!isNaN(bag)){ it.bagPrice = bag; changed = true; }
+    if(!isNaN(kilo)){ it.kiloPrice = kilo; changed = true; }
+    if(!changed){ warn("عددی برای قیمت‌ها وارد نشده است."); return; }
+    if(el("priceedit-current")) el("priceedit-current").innerHTML = "✅ ذخیره شد — قیمت جدید — کیسه: <b>"+(it.bagPrice==null? "-" : it.bagPrice)+"</b> | کیلو: <b>"+(it.kiloPrice==null? "-" : it.kiloPrice)+"</b>";
+    note("✅ قیمت‌ها به‌روزرسانی شد (برای ماندگاری، بک‌آپ JSON را دانلود کنید)");
+    // refresh dependent views
+    if(typeof renderInventory === "function") renderInventory();
+  });
+
+  
+  // ===== Analytics Helpers =====
+  function ana_norm(d){ return d || ""; }
+  function ana_monthKey(d){ if(!d) return ""; return d.slice(0,7); } // yyyy-mm
+  function ana_inRange(d, d1, d2){
+    const a = d || ""; const s = d1 || "0000-01-01"; const e = d2 || "9999-12-31";
+    return a>=s && a<=e;
+  }
+  function ana_fillSelectors(){
+    // group
+    const gsel = el("ana-group"); if(gsel){
+      const cur = gsel.value;
+      const groups = Array.from(new Set(DB.items.map(x=>x.group).filter(Boolean))).sort();
+      gsel.innerHTML = "<option value=''>— همه گروه‌ها —</option>";
+      groups.forEach(g=>{ const o=document.createElement("option"); o.value=g; o.textContent=g; gsel.appendChild(o); });
+      if(cur && groups.includes(cur)) gsel.value = cur;
+    }
+    // code by group
+    const csel = el("ana-code"); if(csel){
+      const g = el("ana-group")?.value || "";
+      const cur = csel.value;
+      const its = DB.items.filter(i=> !g || i.group===g);
+      csel.innerHTML = "<option value=''>— همه کدها —</option>";
+      its.forEach(i=>{ const o=document.createElement("option"); o.value=i.code; o.textContent=i.code; csel.appendChild(o); });
+      if(cur && its.some(i=> i.code===cur)) csel.value = cur;
+    }
+  }
+  if(el("ana-group")) el("ana-group").addEventListener("change", ana_fillSelectors);
+
+  // ===== Analytics Core (Read-only) =====
+  function ana_refresh(){
+    const d1 = el("ana-from")?.value || "";
+    const d2 = el("ana-to")?.value || "";
+    const g  = el("ana-group")?.value || "";
+    const c  = el("ana-code")?.value || "";
+    const tx = DB.txns
+      .filter(t=> t.type==="out") // مصرف = خروج
+      .filter(t=> ana_inRange(t.date, d1, d2))
+      .filter(t=> !c || t.code===c);
+
+    const items = DB.items;
+    const groupMap = {}; items.forEach(i=> groupMap[i.code]=i.group);
+
+    // 1) مصرف ماهانه
+    const mAgg = {}; // key: yyyy-mm + code
+    tx.forEach(t=>{
+      if(g && (groupMap[t.code]||"") !== g) return;
+      const m = ana_monthKey(t.date);
+      const key = m + "|" + t.code;
+      mAgg[key] = (mAgg[key]||0) + (+t.qty || +t.quantity || 0);
+    });
+    const rowsM = Object.entries(mAgg)
+      .map(([k,v])=>{
+        const [m,code]=k.split("|");
+        return {month:m, code, group: groupMap[code]||"", qty: v};
+      })
+      .sort((a,b)=> (a.month.localeCompare(b.month) || a.code.localeCompare(b.code)));
+    renderTable("ana-monthly", ["ماه","گروه","کد","مجموع خروج"], rowsM.map(r=>[r.month,r.group,r.code,r.qty]));
+
+    // 2) پرمصرف‌ترین رنگ‌ها (Top N)
+    const cAgg = {}; // by code
+    tx.forEach(t=>{
+      if(g && (groupMap[t.code]||"") !== g) return;
+      const q = (+t.qty || +t.quantity || 0);
+      cAgg[t.code] = (cAgg[t.code]||0) + q;
+    });
+    const topN = Math.max(1, parseInt(el("ana-top-n")?.value||"10",10));
+    const rowsTop = Object.entries(cAgg)
+      .map(([code,qty])=> ({code, group: groupMap[code]||"", qty}))
+      .filter(r=> !c || r.code===c)
+      .sort((a,b)=> b.qty - a.qty)
+      .slice(0, topN)
+      .map((r,i)=> [i+1, r.group, r.code, r.qty]);
+    renderTable("ana-top", ["رتبه","گروه","کد","مجموع خروج"], rowsTop);
+
+    // 3) بدون مصرف
+    const codesInRange = new Set(tx.filter(t=> !g || (groupMap[t.code]||"")===g).map(t=> t.code));
+    const idle = items
+      .filter(i=> !g || i.group===g)
+      .filter(i=> !c || i.code===c)
+      .filter(i=> !codesInRange.has(i.code))
+      .sort((a,b)=> (a.group||"").localeCompare(b.group||"", 'fa') || (a.code||"").localeCompare(b.code||"", 'fa'));
+    renderTable("ana-idle", ["گروه","کد","قیمت کیسه","قیمت کیلو"], idle.map(i=>[i.group||"", i.code, i.bagPrice??"-", i.kiloPrice??"-"]));
+
+    // 4) موجودی + ارزش ریالی (تا امروز)
+    const bal = {}; DB.txns.forEach(t=>{
+      const q = (+t.qty || +t.quantity || 0);
+      bal[t.code] = (bal[t.code]||0) + (t.type==='in'? q : -q);
+    });
+    items.forEach(it=>{ bal[it.code] = (bal[it.code]||0) + (+it.qty||0) });
+    const invRows = items
+      .filter(i=> !g || i.group===g)
+      .filter(i=> !c || i.code===c)
+      .map(i=>{
+        const qty = +bal[i.code] || 0;
+        const kilo = (i.kiloPrice==null? 0 : +i.kiloPrice);
+        const value = qty * BAG_SIZE * kilo;
+        return {group:i.group||"", code:i.code, qty, bagPrice: (i.bagPrice==null?"-":i.bagPrice), kiloPrice: (i.kiloPrice==null?"-":i.kiloPrice), value};
+      })
+      .sort((a,b)=> (a.group||"").localeCompare(b.group||"", 'fa') || (a.code||"").localeCompare(b.code||"", 'fa'));
+    const totalQty = invRows.reduce((s,r)=> s + (+r.qty||0), 0);
+    const totalVal = invRows.reduce((s,r)=> s + (+r.value||0), 0);
+    renderTable("ana-value", ["گروه","کد","موجودی","قیمت کیسه","ارزش موجودی"], invRows.map(r=>[r.group,r.code,r.qty,r.kiloPrice,r.value]));
+    // summary line
+    const holder = document.getElementById("ana-value");
+    const sum = document.createElement("div"); sum.className="muted"; sum.style.marginTop="6px";
+    sum.innerHTML = "جمع موجودی: <b>"+totalQty+"</b> | جمع ارزش موجودی: <b>"+totalVal+"</b>";
+    holder.appendChild(sum);
+  }
+
+  function renderTable(holderId, headers, rows){
+    const root = document.getElementById(holderId);
+    if(!root) return;
+    root.innerHTML = "";
+    if(!rows || rows.length===0){ root.innerHTML = "<div class='muted'>— موردی یافت نشد —</div>"; return; }
+    const t = document.createElement("table");
+    const thead = document.createElement("thead");
+    const trh = document.createElement("tr");
+    headers.forEach(h=>{ const th=document.createElement("th"); th.textContent=h; trh.appendChild(th); });
+    thead.appendChild(trh); t.appendChild(thead);
+    const tb = document.createElement("tbody");
+    rows.forEach(r=>{
+      const tr=document.createElement("tr");
+      r.forEach(c=>{ const td=document.createElement("td"); td.textContent = (c==null? "": c); tr.appendChild(td); });
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+    root.appendChild(t);
+  }
+
+  // CSV helpers
+  function tableToCSV(holderId){
+    const holder = document.getElementById(holderId);
+    if(!holder) return "";
+    const rows = Array.from(holder.querySelectorAll("table tr"));
+    return rows.map(tr=> Array.from(tr.children).map(td=> (td.textContent||"").replace(/,/g," ")).join(",")).join("\n");
+  }
+  function downloadCSV(name, holderId){
+    const csv = tableToCSV(holderId);
+    const blob = new Blob([csv], {type:"text/csv"});
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  }
+  if(el("ana-monthly-csv")) el("ana-monthly-csv").addEventListener("click", ()=> downloadCSV("monthly_consumption.csv","ana-monthly"));
+  if(el("ana-top-csv")) el("ana-top-csv").addEventListener("click", ()=> downloadCSV("top_consumption.csv","ana-top"));
+  if(el("ana-idle-csv")) el("ana-idle-csv").addEventListener("click", ()=> downloadCSV("idle_items.csv","ana-idle"));
+  if(el("ana-value-csv")) el("ana-value-csv").addEventListener("click", ()=> downloadCSV("inventory_value.csv","ana-value"));
+
+  
+  // ===== Single-table PDF exporter for analytics =====
+  function ana_exportPDF(holderId, title){
+    const node = document.getElementById(holderId);
+    if(!node){ alert("جدول پیدا نشد."); return; }
+    const win = window.open("", "_blank");
+    const styles = `
+      <style>
+        @page { size: A4; margin: 16mm; }
+        body { font-family: Tahoma, sans-serif; color:#111; }
+        h1,h2,h3,h4{ margin:0 0 8px 0; }
+        .header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+        .meta{ color:#6b7280; font-size:12px; }
+        table{ width:100%; border-collapse:collapse; }
+        th,td{ border:1px solid #e5e7eb; padding:6px; text-align:center; font-size:12px; }
+        th{ background:#f3f4f6; }
+      </style>`;
+    const content = node.cloneNode(true);
+    // remove inner toolbars if any
+    content.querySelectorAll('.no-print, .toolbar').forEach(e=> e.remove());
+    const now = new Date().toLocaleString("fa-IR");
+    win.document.write(`<!DOCTYPE html><html dir="rtl" lang="fa"><head><meta charset="utf-8"><title>${title}</title>${styles}</head><body>`);
+    win.document.write(`<div class="header"><h2>${title}</h2><div class="meta">${now}</div></div>`);
+    win.document.body.appendChild(content);
+    win.document.write(`</body></html>`);
+    win.document.close();
+    setTimeout(()=> win.print(), 300);
+  }
+
+  // Bind per-table PDF buttons
+  if(el("ana-monthly-pdf")) el("ana-monthly-pdf").addEventListener("click", ()=> ana_exportPDF("ana-monthly","مصرف ماهانه (خروج)"));
+  if(el("ana-top-pdf"))     el("ana-top-pdf").addEventListener("click", ()=> ana_exportPDF("ana-top","پرمصرف‌ترین رنگ‌ها"));
+  if(el("ana-idle-pdf"))    el("ana-idle-pdf").addEventListener("click", ()=> ana_exportPDF("ana-idle","بدون مصرف در بازه"));
+    if(el("ana-moves-pdf"))  el("ana-moves-pdf").addEventListener("click", ()=> ana_exportPDF("ana-moves","ورود و خروج در بازه"));
+  if(el("ana-value-pdf"))   el("ana-value-pdf").addEventListener("click", ()=> ana_exportPDF("ana-value","موجودی به‌روز + ارزش ریالی"));
+
+// PDF (print only the analytics section)
+  if(el("ana-pdf")) el("ana-pdf").addEventListener("click", function(){
+    const node = el("analytics");
+    const win = window.open("", "_blank");
+    const styles = `
+      <style>
+        @page { size: A4; margin: 16mm; }
+        body { font-family: Tahoma, sans-serif; color:#111; }
+        h1,h2,h3,h4{ margin:0 0 8px 0; }
+        .chip{ background:#111827;color:#fff;padding:2px 8px;border-radius:6px;display:inline-block }
+        table{ width:100%; border-collapse:collapse; }
+        th,td{ border:1px solid #e5e7eb; padding:6px; text-align:center; font-size:12px; }
+        th{ background:#f3f4f6; }
+      </style>`;
+    const content = node.cloneNode(true);
+    content.querySelectorAll('.no-print, .toolbar').forEach(e=> e.remove());
+    const now = new Date().toLocaleString("fa-IR");
+    win.document.write(`<!DOCTYPE html><html dir="rtl" lang="fa"><head><meta charset="utf-8"><title>گزارش‌های تحلیلی</title>${styles}</head><body>`);
+    win.document.write(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2>گزارش‌های تحلیلی</h2><div style="color:#6b7280;font-size:12px">${now}</div></div>`);
+    win.document.body.appendChild(content);
+    win.document.write(`</body></html>`);
+    win.document.close();
+    setTimeout(()=> win.print(), 300);
+  });
+
+  // Wire refresh
+  if(el("ana-refresh")) el("ana-refresh").addEventListener("click", ana_refresh);
+
+  // Ensure analytics selectors refresh with app
+  (function(){
+    const orig = refreshAll;
+    if(typeof orig === "function"){
+      window.refreshAll = function(){
+        orig();
+        ana_fillSelectors();
+        // initial render only if there is data
+        try{ ana_refresh(); }catch(e){ /* noop to avoid breaking app */ }
+      }
+    }
+  })();
+
+  // ===== Refresh =====
+  function refreshAll(){
+    fillPriceEditSelectors();
+    ["io-group","inv-group","price-group","pl-group","edit-group"].forEach(id=>{
+      const sel = el(id);
+      if(id==="pl-group") fillGroupSelect(sel, "— همه گروه‌ها —"); else fillGroupSelect(sel, "— گروه رنگی —");
+    // auto-save latest state to LocalStorage
+    saveToLocal();
+    });
+    fillCodeByGroup(el("io-group"), el("io-code"));
+    // price codes
+    (function(){ const gs=el("price-group"); if(gs) fillPriceCodes(); })();
+    // edit codes
+    fillEditSelectors();
+    /* renderInventory(); (disabled: on-demand) */
+    updateZeroAlert();
+  }
+
+  // init
+  document.addEventListener("DOMContentLoaded", refreshAll);
+  refreshAll();
+  try{ postProcessDates(); }catch(_e){}
+})();
+</script>
+<script>
+// --- Zero-inventory: manual show + PDF export (safe, standalone) ---
+(function(){
+  function el(id){ return document.getElementById(id); }
+  function onReady(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+  onReady(function(){
+    var showBtn = el('btn-zero-show');
+    if(showBtn){
+      showBtn.addEventListener('click', function(){
+        try{ if(typeof updateZeroAlert==='function') updateZeroAlert(); }catch(e){}
+        var zl = el('zero-list'); if(zl) zl.style.display='block';
+      });
+    }
+    var pdfBtn = el('btn-zero-pdf');
+    if(pdfBtn){
+      pdfBtn.addEventListener('click', function(){
+        try{ if(typeof updateZeroAlert==='function') updateZeroAlert(); }catch(e){}
+        try{ if(typeof exportPDF==='function') exportPDF('zero-alert', 'کالاهای با موجودی صفر'); }catch(e){}
+      });
+    }
+  });
+
+  // ===== Reports: Daily and Range =====
+  function rep_table(rootId, headers, rows, caption){
+    const root = document.getElementById(rootId);
+    if(!root) return;
+    root.innerHTML = "";
+    if(caption){
+      const c = document.createElement("div"); c.className="muted"; c.textContent = caption; root.appendChild(c);
+    }
+    const t = document.createElement("table");
+    const thead = document.createElement("thead");
+    const trh = document.createElement("tr");
+    headers.forEach(h=>{ const th=document.createElement("th"); th.textContent=h; trh.appendChild(th); });
+    thead.appendChild(trh); t.appendChild(thead);
+    const tb = document.createElement("tbody");
+    rows.forEach(r=>{
+      const tr=document.createElement("tr");
+      r.forEach(c=>{ const td=document.createElement("td"); td.textContent = (c==null? "": c); tr.appendChild(td); });
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); root.appendChild(t);
+  }
+
+  function dateISO(d){ return (d instanceof Date? d: new Date(d)).toISOString().slice(0,10); }
+  function prevDate(iso){ const d=new Date(iso); d.setDate(d.getDate()-1); return dateISO(d); }
+
+  function showDailyReport(){
+    const date = document.getElementById("rep-date")?.value || todayISO();
+    const txs = DB.txns.filter(t=> (t.date||"")===date);
+    const byCode = {};
+    txs.forEach(t=>{
+      const b = byCode[t.code] = byCode[t.code] || {in:0,out:0};
+      if(t.type==='in') b.in += +t.qty; else b.out += +t.qty;
+    });
+    const rows = Object.keys(byCode).sort().map(code=>{
+      const it = DB.items.find(i=> i.code===code) || {};
+      const inq = byCode[code].in, outq = byCode[code].out;
+      const close = (typeof stockOn==='function')? stockOn(code, date) : "";
+      return [it.group||"-", code, inq, outq, (inq - outq), close];
+    });
+    // totals
+    const tin = txs.filter(t=> t.type==='in').reduce((s,t)=> s+ +t.qty,0);
+    const tout= txs.filter(t=> t.type==='out').reduce((s,t)=> s+ +t.qty,0);
+    rows.push(["", "جمع", tin, tout, (tin - tout), ""]);
+    rep_table("rep-daily", ["گروه","کد","ورود","خروج","خالص","موجودی پایان روز"], rows, "تاریخ: "+date);
+  }
+
+  function showRangeReport(){
+    const from = document.getElementById("rep-from")?.value || "";
+    const to   = document.getElementById("rep-to")?.value || "";
+    if(!from || !to){ warn("لطفاً بازه را کامل وارد کنید."); return; }
+    const txs = DB.txns.filter(t=> (t.date||"")>=from && (t.date||"")<=to);
+    const byCode = {};
+    txs.forEach(t=>{
+      const b = byCode[t.code] = byCode[t.code] || {in:0,out:0};
+      if(t.type==='in') b.in += +t.qty; else b.out += +t.qty;
+    });
+    const rows = Object.keys(byCode).sort().map(code=>{
+      const it = DB.items.find(i=> i.code===code) || {};
+      const open = (typeof stockOn==='function')? stockOn(code, prevDate(from)) : "";
+      const close= (typeof stockOn==='function')? stockOn(code, to) : "";
+      const inq = byCode[code].in, outq = byCode[code].out;
+      return [it.group||"-", code, open, inq, outq, (inq - outq), close];
+    });
+    const tin = txs.filter(t=> t.type==='in').reduce((s,t)=> s+ +t.qty,0);
+    const tout= txs.filter(t=> t.type==='out').reduce((s,t)=> s+ +t.qty,0);
+    rows.push(["", "جمع کل", "", tin, tout, (tin - tout), ""]);
+    rep_table("rep-range", ["گروه","کد","موجودی آغازین","ورود","خروج","خالص","موجودی پایانی"], rows, "از "+from+" تا "+to);
+  }
+
+  // Bindings
+  if(document.getElementById("rep-date")) document.getElementById("rep-date").value = todayISO();
+  if(document.getElementById("rep-daily-show")) document.getElementById("rep-daily-show").addEventListener("click", showDailyReport);
+  if(document.getElementById("rep-range-show")) document.getElementById("rep-range-show").addEventListener("click", showRangeReport);
+
+  // PDF export for the two new tables
+  if(document.getElementById("rep-daily-pdf")) document.getElementById("rep-daily-pdf").addEventListener("click", ()=> ana_exportPDF("rep-daily", "گزارش روزانه"));
+  if(document.getElementById("rep-range-pdf")) document.getElementById("rep-range-pdf").addEventListener("click", ()=> ana_exportPDF("rep-range", "گزارش بازه‌ای"));
+})();
+</script>
+</body>
+</html>
